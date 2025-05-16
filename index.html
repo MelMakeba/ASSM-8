@@ -5,45 +5,69 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/png" sizes="32x32" href="./assets/images/favicon-32x32.png">
   <title>Frontend Mentor | Product list with cart</title>
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Outfit:wght@100..900&family=Red+Hat+Text:ital,wght@0,300..700;1,300..700&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="container">
     <header class="header">
       <h1 class="header__title">Desserts</h1>
     </header>
+    
     <main class="main">
-     
       <section class="products">
-        <!-- product cards will be added by the Javascript file dynamically -->
+        <!-- Cards will be added dynamically using JavaScript -->
       </section>
 
+     
+
       <aside class="cart">
-        <h2 class="cart_title">Your Cart (<span class="cart_count">0</span>)</h2>
-        <div class="cart_items">
-          <div class="cart_empty-message">Your added items will appear here</div>
-         <!-- <-- Cart items will be dynamically added here --> 
+        <h2 class="cart__title">Your Cart (<span class="cart__count">0</span>)</h2>
+        <div class="cart__items">
+          <div class="cart__empty-message">Your added items will appear here</div>
         </div>
-        <div class="cart_summary hidden">
-          <div class="cart_total">
-            <span class="cart_total-label">Order Total</span>
-            <span class="cart_total-amount">$0.00</span>
+        <div class="cart__summary hidden">
+          <div class="cart__total">
+            <span class="cart__total-label">Order Total</span>
+            <span class="cart__total-amount">$0.00</span>
           </div>
-          <div class="cart_info">
-            <span class="cart_info-text">This is a carbon-neutral delivery</span>
+          <div class="cart__info">
+            <svg class="eco-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2E7D32" stroke-width="2">
+              <path d="M12 2v8m0 0l-5-5m5 5l5-5"></path>
+              <path d="M20 10c0 6-8 10-8 10s-8-4-8-10a8 8 0 1 1 16 0z"></path>
+            </svg>
+            <span class="cart__info-text">This is a <strong>carbon-neutral</strong> delivery</span>
           </div>
-          <button class="cart_confirm-btn">Confirm Order</button>
+          <button class="cart__confirm-btn">Confirm Order</button>
         </div>
       </aside>
     </main>
 
-    <footer class="attribution">
-      Challenge by <a href="https://www.frontendmentor.io?ref=challenge">Frontend Mentor</a>. 
-      Coded by <a href="#">Your Name Here</a>.
-    </footer>
+    <div class="order-confirmation hidden">
+      <div class="order-confirmation__content">
+        <div class="order-confirmation__icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="#2E7D32" stroke-width="2"></circle>
+            <path d="M8 12l3 3 5-5" stroke="#2E7D32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </div>
+        <h2 class="order-confirmation__title">Order Confirmed</h2>
+        <p class="order-confirmation__message">We hope you enjoy your food!</p>
+        
+        <div class="order-confirmation__summary">
+          <!-- Items to be added dynamically using JavaScript  -->
+        </div>
+       
+        <div class="order-confirmation__total">
+          <span class="order-confirmation__total-label">Order Total</span>
+          <span class="order-confirmation__total-amount">$0.00</span>
+        </div>
+        
+        <button class="order-confirmation__btn">Start New Order</button>
+      </div>
+    </div>
   </div>
 
   <script src="main.js"></script>

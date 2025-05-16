@@ -6,10 +6,9 @@ const fetchProducts = async () => {
     }
     const rawData = await response.json();
     
-   
     return rawData.map((item, index) => ({
-      id: index + 1, 
-      title: item.name, 
+      id: index + 1,
+      title: item.name,
       price: item.price,
       category: item.category,
       image: item.image.desktop || item.image.thumbnail
@@ -21,14 +20,17 @@ const fetchProducts = async () => {
 };
 
 let cart = [];
-
 const productsContainer = document.querySelector('.products');
-const cartItemsContainer = document.querySelector('.cart_items');
-const cartCount = document.querySelector('.cart_count');
-const cartEmptyMessage = document.querySelector('.cart_empty-message');
-const cartSummary = document.querySelector('.cart_summary');
-const cartTotalAmount = document.querySelector('.cart_total-amount');
-const confirmButton = document.querySelector('.cart_confirm-btn');
+const cartItemsContainer = document.querySelector('.cart__items');
+const cartCount = document.querySelector('.cart__count');
+const cartEmptyMessage = document.querySelector('.cart__empty-message');
+const cartSummary = document.querySelector('.cart__summary');
+const cartTotalAmount = document.querySelector('.cart__total-amount');
+const confirmButton = document.querySelector('.cart__confirm-btn');
+const orderConfirmation = document.querySelector('.order-confirmation');
+const orderConfirmationSummary = document.querySelector('.order-confirmation__summary');
+const orderConfirmationTotal = document.querySelector('.order-confirmation__total-amount');
+const startNewOrderButton = document.querySelector('.order-confirmation__btn');
 
 const formatPrice = (price) => {
   return `$${price.toFixed(2)}`;
@@ -39,58 +41,76 @@ const createProductCard = (product) => {
   card.className = 'product-card';
   card.setAttribute('data-id', product.id);
   
+  let quantity = 1;
+  
   card.innerHTML = `
-    <div class="product-card_image" style="background-image: url(${product.image})">
-      <div class="product-card_btn-container">
-        <div class="product-card_quantity-controls">
-          <button class="product-card_quantity-btn minus" data-id="${product.id}">-</button>
-          <span class="product-card_quantity" data-id="${product.id}">1</span>
-          <button class="product-card_quantity-btn plus" data-id="${product.id}">+</button>
-        </div>
-        <button class="product-card_btn" data-id="${product.id}">
-          <img src="./assets/images/icon-add-to-cart.svg" alt="add to cart">
-          Add to Cart
-        </button>
+    <div class="product-card__image" style="background-image: url(${product.image})">
+      <div class="quantity-control">
+        <button class="quantity-btn minus" data-id="${product.id}">-</button>
+        <span class="quantity-value" data-id="${product.id}">${quantity}</span>
+        <button class="quantity-btn plus" data-id="${product.id}">+</button>
       </div>
+      <button class="product-card__btn" data-id="${product.id}">
+         <img src="./assets/images/icon-add-to-cart.svg" alt="Add to Cart">
+        Add to Cart
+      </button>
     </div>
-    <div class="product-card_category">${product.category}</div>
-    <h2 class="product-card_title">${product.title}</h2>
-    <div class="product-card_price">${formatPrice(product.price)}</div>
+    <div class="product-card__category">${product.category}</div>
+    <h2 class="product-card__title">${product.title}</div>
+    <div class="product-card__price">${formatPrice(product.price)}</div>
   `;
   
-  const minusBtn = card.querySelector('.product-card_quantity-btn.minus');
-  const plusBtn = card.querySelector('.product-card_quantity-btn.plus');
-  const quantitySpan = card.querySelector('.product-card_quantity');
+
+  const minusBtn = card.querySelector('.quantity-btn.minus');
+  const plusBtn = card.querySelector('.quantity-btn.plus');
+  const quantitySpan = card.querySelector('.quantity-value');
   
   minusBtn.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    let quantity = parseInt(quantitySpan.textContent);
     if (quantity > 1) {
-      quantitySpan.textContent = quantity - 1;
+      quantity--;
+      quantitySpan.textContent = quantity;
     }
   });
   
   plusBtn.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    let quantity = parseInt(quantitySpan.textContent);
-    quantitySpan.textContent = quantity + 1;
+    quantity++;
+    quantitySpan.textContent = quantity;
   });
   
-  
-  const button = card.querySelector('.product-card_btn');
+ 
+  const button = card.querySelector('.product-card__btn');
   button.addEventListener('click', (e) => {
     e.preventDefault();
-    const quantity = parseInt(quantitySpan.textContent);
-    addToCartWithQuantity(product.id, quantity, window.productsData);
+    e.stopPropagation();
+    addToCart(product.id, quantity, window.productsData);
   });
   
   return card;
 };
 
 
-const addToCartWithQuantity = (productId, quantity, products) => {
+const createCartItemElement = (cartItem, product) => {
+  const item = document.createElement('div');
+  item.className = 'cart__item';
+  
+  item.innerHTML = `
+    <div class="cart__item-title">${product.title}</div>
+    <div class="cart__item-details">
+      <span class="cart__item-quantity">${cartItem.quantity}×</span>
+      <span class="cart__item-price">@ ${formatPrice(product.price)}</span>
+      <span class="cart__item-total">${formatPrice(cartItem.quantity * product.price)}</span>
+    </div>
+    <button class="cart__item-remove" data-id="${product.id}">&times;</button>
+  `;
+  
+  return item;
+};
+
+const addToCart = (productId, quantity, products) => {
   const product = products.find(p => p.id === productId);
   if (!product) return;
   
@@ -109,65 +129,6 @@ const addToCartWithQuantity = (productId, quantity, products) => {
   saveCartToLocalStorage();
 };
 
-const createCartItemElement = (cartItem, product) => {
-  const item = document.createElement('div');
-  item.className = 'cart_item';
-  
-  item.innerHTML = `
-    <div class="cart_item-title">${product.title}</div>
-    <div class="cart_item-quantity">
-      <button class="cart_item-decrease" data-id="${product.id}">-</button>
-      <span class="cart_item-count">${cartItem.quantity}×</span>
-      <button class="cart_item-increase" data-id="${product.id}">+</button>
-      <span class="cart_item-price">@ ${formatPrice(product.price)}</span>
-      <span class="cart_item-subtotal">${formatPrice(cartItem.quantity * product.price)}</span>
-    </div>
-    <button class="cart_item-remove" data-id="${product.id}">×</button>
-  `;
-  
-  return item;
-};
-
-const addToCart = (productId, products) => {
-  const product = products.find(p => p.id === productId);
-  if (!product) return;
-  
-  const existingItem = cart.find(item => item.productId === productId);
-  
-  if (existingItem) {
-    existingItem.quantity++;
-  } else {
-    cart.push({
-      productId: productId,
-      quantity: 1
-    });
-  }
-  
-  updateCart(products);
-  saveCartToLocalStorage();
-};
-
-const increaseQuantity = (productId, products) => {
-  const item = cart.find(item => item.productId === productId);
-  if (item) {
-    item.quantity++;
-    updateCart(products);
-    saveCartToLocalStorage();
-  }
-};
-
-const decreaseQuantity = (productId, products) => {
-  const item = cart.find(item => item.productId === productId);
-  if (item) {
-    item.quantity--;
-    if (item.quantity <= 0) {
-      removeFromCart(productId, products);
-    } else {
-      updateCart(products);
-      saveCartToLocalStorage();
-    }
-  }
-};
 
 const removeFromCart = (productId, products) => {
   const index = cart.findIndex(item => item.productId === productId);
@@ -182,6 +143,7 @@ const saveCartToLocalStorage = () => {
   localStorage.setItem('dessertCart', JSON.stringify(cart));
 };
 
+
 const loadCartFromLocalStorage = () => {
   const savedCart = localStorage.getItem('dessertCart');
   if (savedCart) {
@@ -193,6 +155,7 @@ const loadCartFromLocalStorage = () => {
     }
   }
 };
+
 
 const updateCart = (products) => {
   const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
@@ -217,27 +180,15 @@ const updateCart = (products) => {
     }
   });
   
-  document.querySelectorAll('.cart_item-remove').forEach(button => {
+ 
+  document.querySelectorAll('.cart__item-remove').forEach(button => {
     button.addEventListener('click', () => {
       const productId = parseInt(button.getAttribute('data-id'));
       removeFromCart(productId, products);
     });
   });
   
-  document.querySelectorAll('.cart_item-increase').forEach(button => {
-    button.addEventListener('click', () => {
-      const productId = parseInt(button.getAttribute('data-id'));
-      increaseQuantity(productId, products);
-    });
-  });
-  
-  document.querySelectorAll('.cart_item-decrease').forEach(button => {
-    button.addEventListener('click', () => {
-      const productId = parseInt(button.getAttribute('data-id'));
-      decreaseQuantity(productId, products);
-    });
-  });
-  
+ 
   const totalPrice = cart.reduce((total, item) => {
     const product = products.find(p => p.id === item.productId);
     return total + (product ? product.price * item.quantity : 0);
@@ -246,21 +197,59 @@ const updateCart = (products) => {
   cartTotalAmount.textContent = formatPrice(totalPrice);
 };
 
-const renderProducts = (products) => {
-  productsContainer.innerHTML = ''; 
+
+const createOrderConfirmation = (products) => {
+ 
+  orderConfirmationSummary.innerHTML = '';
   
-  products.forEach(product => {
-    const card = createProductCard(product);
-    productsContainer.appendChild(card);
+  cart.forEach(cartItem => {
+    const product = products.find(p => p.id === cartItem.productId);
+    if (product) {
+      const item = document.createElement('div');
+      item.className = 'order-confirmation__item';
+      
+      item.innerHTML = `
+        <div class="order-confirmation__item-img" style="background-image: url(${product.image})"></div>
+        <div class="order-confirmation__item-details">
+          <div class="order-confirmation__item-title">${product.title}</div>
+          <div class="order-confirmation__item-quantity">${cartItem.quantity}× @ ${formatPrice(product.price)}</div>
+        </div>
+        <div class="order-confirmation__item-price">${formatPrice(cartItem.quantity * product.price)}</div>
+      `;
+      
+      orderConfirmationSummary.appendChild(item);
+    }
   });
+  
+  
+  const totalPrice = cart.reduce((total, item) => {
+    const product = products.find(p => p.id === item.productId);
+    return total + (product ? product.price * item.quantity : 0);
+  }, 0);
+  
+  orderConfirmationTotal.textContent = formatPrice(totalPrice);
+  
+  orderConfirmation.classList.remove('hidden');
 };
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.product-card') && !e.target.closest('.quantity-control')) {
+    document.querySelectorAll('.quantity-control').forEach(control => {
+      control.remove();
+    });
+    document.querySelectorAll('.product-card').forEach(card => {
+      card.classList.remove('selected');
+    });
+  }
+});
 
 const initApp = async () => {
   try {
+ 
     productsContainer.innerHTML = '<div class="loading">Loading products...</div>';
-    
+
     const products = await fetchProducts();
-    
+
     window.productsData = products;
     
     if (products.length === 0) {
@@ -270,17 +259,25 @@ const initApp = async () => {
     
     loadCartFromLocalStorage();
     
-    renderProducts(products);
+    productsContainer.innerHTML = '';
+    products.forEach(product => {
+      const card = createProductCard(product);
+      productsContainer.appendChild(card);
+    });
     
     updateCart(products);
     
     confirmButton.addEventListener('click', () => {
       if (cart.length > 0) {
-        alert('Order confirmed! Thank you for your purchase.');
-        cart = [];
-        updateCart(products);
-        saveCartToLocalStorage();
+        createOrderConfirmation(products);
       }
+    });
+    
+    startNewOrderButton.addEventListener('click', () => {
+      cart = [];
+      updateCart(products);
+      saveCartToLocalStorage();
+      orderConfirmation.classList.add('hidden');
     });
     
   } catch (error) {
